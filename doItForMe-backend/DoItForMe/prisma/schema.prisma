@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  email     String   @unique
+  password  String
+  rating    Float    @default(0)
+  is_runner Boolean  @default(false)
+  balance   Float    @default(15.0)
+
+  tasksCreated  Task[]  @relation("CreatorRelation")
+  tasksAssigned Task[]  @relation("RunnerRelation")
+  offers        Offer[]
+  comments      TaskComment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Task {
+  id             Int      @id @default(autoincrement())
+  titulo         String
+  descripcion    String
+  categoria      String
+  estado         String   @default("OPEN")
+  precio_inicial Float
+  precio_final   Float?
+  lat            Float?
+  lng            Float?
+
+  creator_id     Int
+  creator        User     @relation("CreatorRelation", fields: [creator_id], references: [id])
+
+  runner_id      Int?
+  runner         User?    @relation("RunnerRelation", fields: [runner_id], references: [id])
+
+  offers         Offer[]
+  comments       TaskComment[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Offer {
+  id               Int      @id @default(autoincrement())
+
+  task_id          Int
+  task             Task     @relation(fields: [task_id], references: [id])
+
+  runner_id        Int
+  runner           User     @relation(fields: [runner_id], references: [id])
+
+  precio_propuesto Float
+  mensaje          String?
+  estado           String   @default("PENDING")
+  comment          String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model TaskComment {
+  id        Int      @id @default(autoincrement())
+  task_id   Int
+  task      Task     @relation(fields: [task_id], references: [id])
+  author_id Int
+  author    User     @relation(fields: [author_id], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+}
