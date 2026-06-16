@@ -76,8 +76,7 @@ const withOfferSummary = async <T extends { id: number }>(tasks: T[]) => {
 };
 
 /**
- * Obtiene una tarea con sus ofertas para un usuario específico.
- * Si el usuario es el creador, ve todas las ofertas; si es un runner, solo las suyas.
+ * Obtiene una tarea con todas sus ofertas para cualquier usuario autenticado.
  *
  * @param taskId - ID de la tarea.
  * @param userId - ID del usuario que realiza la consulta.
@@ -101,7 +100,7 @@ const getTaskForUser = async (taskId: number, userId: number) => {
       _min: { precio_propuesto: true },
     }),
     prisma.offer.findMany({
-      where: task.creator_id === userId ? { task_id: taskId } : { task_id: taskId, runner_id: userId },
+      where: { task_id: taskId },
       include: {
         runner: { select: { id: true, nombre: true, rating: true } },
       },
